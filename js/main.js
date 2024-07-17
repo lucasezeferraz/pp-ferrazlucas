@@ -74,7 +74,7 @@ if (usuario === "administrador") {
       }
 
       consultarSaldo() {
-        alert("Saldo actual: $" + this.saldo + "." + "\nS");
+        alert("Saldo actual: $" + this.saldo + "." + "\nSaldo en dolares: " + this.saldoDolares);
       }
 
       retirarDinero() {
@@ -95,14 +95,14 @@ if (usuario === "administrador") {
           alert("Depósito exitoso. Saldo actual: $" + this.saldo + ".");
 
         } else {
-          alert("no se puede ingresar mas de $250.000")
+          alert("no se puede ingresar mas de $500.000")
         }
       }
 
       comprarDolares() {
         alert("El dolar esta a ARS$1000 .")
         let compraSiONo = prompt("Desea comprar dolares?.");
-        compraSiONo= compraSiONo.toLowerCase()
+        compraSiONo = compraSiONo.toLowerCase()
         if (compraSiONo === "si") {
 
           let dolares = parseInt(prompt("¿Cuántos dólares desea comprar?."));
@@ -119,7 +119,7 @@ if (usuario === "administrador") {
             alert("Fondos insuficientes para comprar dolares.")
           }
         } else if (compraSiONo === "no") {
-          alert("")
+        
         } else {
           alert("Las opciones son si o no.")
         }
