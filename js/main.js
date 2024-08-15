@@ -1,69 +1,65 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const mensaje = document.getElementById("mensaje");
   const operaciones = document.getElementById("operaciones");
   const resultado = document.getElementById("resultado");
 
-
-  //FUNCION APRA MOSTRAR UN MENSAJE
+  // Función para mostrar un mensaje
   const mostrarMensaje = (text) => {
     mensaje.innerText = text;
   };
 
-
-  //FUNCION QUE SI EL USUARIO NO INGRESA NADA DEVUELVE UNA CADENA VACIA O EL DATO PROPORCIONADO CON EL METODO "trim()" QUE ELIMINA LOS ESPACIOS EN BLANCO AL PRINCIPIO Y AL FINAL
+  // Función para obtener una respuesta del usuario, eliminando espacios en blanco
   const preguntar = (text) => {
     const respuesta = prompt(text);
     return respuesta ? respuesta.trim() : "";
   };
 
-
-  //FUNCION PARA SABER SI ES CLIENTE O ADMINISTRADOR
-  const obtenerTipoDeUsuario = (preguntar) => {
+  // Función para verificar si el tipo de usuario es válido
+  const obtenerTipoDeUsuario = () => {
     const esValido = (tipo) => tipo === "administrador" || tipo === "cliente";
 
     let tipoDeUsuario;
-    while (true) {
+    do {
       tipoDeUsuario = preguntar("¿Cómo desea ingresar al sistema?\nComo Administrador\nComo Cliente").toLowerCase();
-      if (esValido(tipoDeUsuario)) {
-        return tipoDeUsuario;
-      } else {
+      if (!esValido(tipoDeUsuario)) {
         alert(`'${tipoDeUsuario}' no es una opción válida. Por favor, ingrese 'Administrador' o 'Cliente'.`);
       }
-    }
+    } while (!esValido(tipoDeUsuario));
+    return tipoDeUsuario;
   };
 
-
-  //FUNCION PARA EL INICIO DE SESION Y VERIFICACION DE LA MISMA
+  // Función para gestionar el acceso del cliente
   const gestionarAccesoCliente = (pinGuardado, maxIntentos = 3) => {
-    for (let i = maxIntentos - 1; i >= 0; i--) {
-      let ingreso = preguntar("Ingresa tu PIN.");
-      if (parseInt(ingreso) === pinGuardado) {
+    for (let i = maxIntentos; i > 0; i--) {
+      let ingreso = parseInt(preguntar("Ingresa tu PIN."), 10);
+      if (ingreso === pinGuardado) {
         mostrarMensaje("Bienvenido Cliente. Ya puedes operar.");
         return true;
       } else {
-        alert(`Error. Te quedan ${i} intentos.`);
+        alert(`Error. Te quedan ${i - 1} intentos.`);
       }
     }
+    mostrarMensaje("Acceso denegado. Te has quedado sin intentos.");
     return false;
   };
 
-
-  //FUNCION PARA CADA MOVIMIENTO QUE SE REALIZE EN LA CUENTA SEA UN DEPOSITO UN RETIRO O UNA COMRPA DE DOLARES CADA VEZ QUE REALIZE UNA VA A GUARDAR ESE DATO Y LO VA A SUBIR A UN ARRAY
+  // Función para registrar transacciones
   const registrarTransaccion = (transacciones, tipo, monto) => {
     transacciones.push({ tipo, monto, fecha: new Date() });
   };
 
-
-  //FUNCION PARA CONSULTAR EL SALDO DE ACTUAL DE LA CUENTA(DOLARES Y PESOS)
+  // Función para consultar el saldo actual
   const consultarSaldo = (saldo, saldoDolares) => {
     mostrarMensaje(`Saldo actual: $${saldo}.\nSaldo en dólares: $${saldoDolares}.`);
   };
 
-
-  //FUNCION PARA RETIRAR DINERO
+  // Función para retirar dinero
   const retirarDinero = (saldo, transacciones) => {
-    let retiro = parseInt(prompt("Ingrese cuanto dinero desea retirar."));
+    let retiro = parseInt(prompt("Ingrese cuánto dinero desea retirar."), 10);
+    if (isNaN(retiro)) {
+      mostrarMensaje("Por favor, ingrese una cantidad válida.");
+      return saldo;
+    }
     if (retiro <= saldo) {
       saldo -= retiro;
       registrarTransaccion(transacciones, "Retiro", retiro);
@@ -74,10 +70,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return saldo;
   };
 
-
-  //FUNCION PARA DEPOSITAR DINERO
+  // Función para depositar dinero
   const depositarDinero = (saldo, transacciones) => {
-    let deposito = parseInt(prompt("Ingrese cuanto dinero desea depositar."));
+    let deposito = parseInt(prompt("Ingrese cuánto dinero desea depositar."), 10);
+    if (isNaN(deposito)) {
+      mostrarMensaje("Por favor, ingrese una cantidad válida.");
+      return saldo;
+    }
     if (deposito <= 500000) {
       saldo += deposito;
       registrarTransaccion(transacciones, "Depósito", deposito);
@@ -88,13 +87,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return saldo;
   };
 
-
-  //FUNCION PARA COMPRAR DOLARES 
+  // Función para comprar dólares
   const comprarDolares = (saldo, saldoDolares, transacciones) => {
     const tasaDeCambio = 1000;
-    let compraSiONo = prompt("¿Desea comprar dólares? (si/no)").toLowerCase();
+    let compraSiONo = preguntar("¿Desea comprar dólares? (si/no)").toLowerCase();
     if (compraSiONo === "si") {
-      let dolares = parseInt(prompt("¿Cuántos dólares desea comprar?"));
+      let dolares = parseInt(prompt("¿Cuántos dólares desea comprar?"), 10);
+      if (isNaN(dolares)) {
+        mostrarMensaje("Por favor, ingrese una cantidad válida.");
+        return [saldo, saldoDolares];
+      }
       let costoEnPesos = dolares * tasaDeCambio;
       if (costoEnPesos <= saldo && dolares <= 200) {
         saldo -= costoEnPesos;
@@ -112,8 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return [saldo, saldoDolares];
   };
 
-
-  //FUNCION PARA LAS TRANSACCIONES DE LAS OPERACIONES QUE SE REALIZE
+  // Función para mostrar el historial de transacciones
   const mostrarTransacciones = (transacciones) => {
     if (transacciones.length > 0) {
       let historial = "Transacciones realizadas:<br>";
@@ -126,17 +127,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-
-  //FUNCION PARA INICIAR EL BANCO CON SUS OPERACIONES DEPENDIENDO EL TIPO DE USUSARIO QUE ELIJA
+  // Función para iniciar el banco
   const iniciarBanco = () => {
-    let usuario = obtenerTipoDeUsuario(preguntar);
+    let usuario = obtenerTipoDeUsuario();
 
     if (usuario === "administrador") {
       mostrarMensaje("Ingresaste como Administrador.");
       // Lógica para administrador
     } else if (usuario === "cliente") {
       mostrarMensaje("Ingresaste como Cliente.");
-      let pinGuardado = parseInt(prompt("Ingrese su nuevo PIN."));
+      let pinGuardado = parseInt(prompt("Ingrese su nuevo PIN."), 10);
       let acceso = gestionarAccesoCliente(pinGuardado);
 
       if (acceso) {

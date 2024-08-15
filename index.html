@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Banco Virtual</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <h1>Bienvenido al Banco Virtual</h1>
-  <div id="mensaje"></div>
-  <div id="operaciones"></div>
-  <div id="resultado"></div>
 
+<body>
+  <header>
+    <h1>Bienvenido al Banco Virtual</h1>
+  </header>
+  <main>
+    <section id="mensaje" role="alert"></section>
+    <section id="operaciones">
+      <button id="consultar">Consultar Saldo</button>
+      <button id="retirar">Retirar Dinero</button>
+      <button id="depositar">Depositar Dinero</button>
+      <button id="comprar">Comprar Dólares</button>
+      <button id="transacciones">Mostrar Transacciones</button>
+      <button id="salir">Salir</button>
+    </section>
+    <section id="resultado"></section>
+  </main>
   <script src="js/main.js"></script>
 </body>
+
 </html>
