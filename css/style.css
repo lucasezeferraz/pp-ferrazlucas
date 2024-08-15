@@ -1,0 +1,27 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+#mensaje, #resultado {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#operaciones button {
+  margin: 5px;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#operaciones button:hover {
+  background-color: #45a049;
+}
+
