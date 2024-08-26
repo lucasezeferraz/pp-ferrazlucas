@@ -1,61 +1,59 @@
 document.addEventListener("DOMContentLoaded", () => {
   const mensaje = document.getElementById("mensaje");
   const operaciones = document.getElementById("operaciones");
-  const resultado = document.getElementById("resultado");
 
-  // Función para mostrar un mensaje
   const mostrarMensaje = (text) => {
     mensaje.innerText = text;
   };
 
-  // Función para obtener una respuesta del usuario, eliminando espacios en blanco
-  const preguntar = (text) => {
-    const respuesta = prompt(text);
+  const preguntar = async (text) => {
+    const { value: respuesta } = await Swal.fire({
+      title: text,
+      input: 'text',
+      inputPlaceholder: 'Escribe aquí...',
+      showCancelButton: true,
+    });
     return respuesta ? respuesta.trim() : "";
   };
 
-  // Función para verificar si el tipo de usuario es válido
-  const obtenerTipoDeUsuario = () => {
+  const obtenerTipoDeUsuario = async () => {
     const esValido = (tipo) => tipo === "administrador" || tipo === "cliente";
 
     let tipoDeUsuario;
     do {
-      tipoDeUsuario = preguntar("¿Cómo desea ingresar al sistema?\nComo Administrador\nComo Cliente").toLowerCase();
+      tipoDeUsuario = await preguntar("¿Cómo desea ingresar al sistema?\nComo Administrador\nComo Cliente");
+      tipoDeUsuario = tipoDeUsuario.toLowerCase();
       if (!esValido(tipoDeUsuario)) {
-        alert(`'${tipoDeUsuario}' no es una opción válida. Por favor, ingrese 'Administrador' o 'Cliente'.`);
+        await Swal.fire(`'${tipoDeUsuario}' no es una opción válida. Por favor, ingrese 'Administrador' o 'Cliente'.`);
       }
     } while (!esValido(tipoDeUsuario));
     return tipoDeUsuario;
   };
 
-  // Función para gestionar el acceso del cliente
-  const gestionarAccesoCliente = (pinGuardado, maxIntentos = 3) => {
+  const gestionarAccesoCliente = async (pinGuardado, maxIntentos = 3) => {
     for (let i = maxIntentos; i > 0; i--) {
-      let ingreso = parseInt(preguntar("Ingresa tu PIN."), 10);
+      const ingreso = parseInt(await preguntar("Ingresa tu PIN."), 10);
       if (ingreso === pinGuardado) {
         mostrarMensaje("Bienvenido Cliente. Ya puedes operar.");
         return true;
       } else {
-        alert(`Error. Te quedan ${i - 1} intentos.`);
+        await Swal.fire(`Error. Te quedan ${i - 1} intentos.`);
       }
     }
     mostrarMensaje("Acceso denegado. Te has quedado sin intentos.");
     return false;
   };
 
-  // Función para registrar transacciones
   const registrarTransaccion = (transacciones, tipo, monto) => {
     transacciones.push({ tipo, monto, fecha: new Date() });
   };
 
-  // Función para consultar el saldo actual
   const consultarSaldo = (saldo, saldoDolares) => {
     mostrarMensaje(`Saldo actual: $${saldo}.\nSaldo en dólares: $${saldoDolares}.`);
   };
 
-  // Función para retirar dinero
-  const retirarDinero = (saldo, transacciones) => {
-    let retiro = parseInt(prompt("Ingrese cuánto dinero desea retirar."), 10);
+  const retirarDinero = async (saldo, transacciones) => {
+    const retiro = parseInt(await preguntar("Ingrese cuánto dinero desea retirar."), 10);
     if (isNaN(retiro)) {
       mostrarMensaje("Por favor, ingrese una cantidad válida.");
       return saldo;
@@ -70,9 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return saldo;
   };
 
-  // Función para depositar dinero
-  const depositarDinero = (saldo, transacciones) => {
-    let deposito = parseInt(prompt("Ingrese cuánto dinero desea depositar."), 10);
+  const depositarDinero = async (saldo, transacciones) => {
+    const deposito = parseInt(await preguntar("Ingrese cuánto dinero desea depositar."), 10);
     if (isNaN(deposito)) {
       mostrarMensaje("Por favor, ingrese una cantidad válida.");
       return saldo;
@@ -87,17 +84,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return saldo;
   };
 
-  // Función para comprar dólares
-  const comprarDolares = (saldo, saldoDolares, transacciones) => {
+  const comprarDolares = async (saldo, saldoDolares, transacciones) => {
     const tasaDeCambio = 1000;
-    let compraSiONo = preguntar("¿Desea comprar dólares? (si/no)").toLowerCase();
+    const compraSiONo = (await preguntar("¿Desea comprar dólares? (si/no)")).toLowerCase();
     if (compraSiONo === "si") {
-      let dolares = parseInt(prompt("¿Cuántos dólares desea comprar?"), 10);
+      const dolares = parseInt(await preguntar("¿Cuántos dólares desea comprar?"), 10);
       if (isNaN(dolares)) {
         mostrarMensaje("Por favor, ingrese una cantidad válida.");
         return [saldo, saldoDolares];
       }
-      let costoEnPesos = dolares * tasaDeCambio;
+      const costoEnPesos = dolares * tasaDeCambio;
       if (costoEnPesos <= saldo && dolares <= 200) {
         saldo -= costoEnPesos;
         saldoDolares += dolares;
@@ -114,30 +110,37 @@ document.addEventListener("DOMContentLoaded", () => {
     return [saldo, saldoDolares];
   };
 
-  // Función para mostrar el historial de transacciones
   const mostrarTransacciones = (transacciones) => {
     if (transacciones.length > 0) {
-      let historial = "Transacciones realizadas:<br>";
+      let historial = "";
       transacciones.forEach(transaccion => {
         historial += `${transaccion.fecha.toLocaleString()}: ${transaccion.tipo} - $${transaccion.monto}<br>`;
       });
-      resultado.innerHTML = historial;
+
+      Swal.fire({
+        title: 'Transacciones realizadas',
+        html: historial,
+        icon: 'info',
+        confirmButtonText: 'Aceptar'
+      });
     } else {
-      resultado.innerHTML = "No hay transacciones realizadas.";
+      Swal.fire({
+        title: 'No hay transacciones realizadas.',
+        icon: 'info',
+        confirmButtonText: 'Aceptar'
+      });
     }
   };
 
-  // Función para iniciar el banco
-  const iniciarBanco = () => {
-    let usuario = obtenerTipoDeUsuario();
+  const iniciarBanco = async () => {
+    const usuario = await obtenerTipoDeUsuario();
 
     if (usuario === "administrador") {
       mostrarMensaje("Ingresaste como Administrador.");
-      // Lógica para administrador
     } else if (usuario === "cliente") {
       mostrarMensaje("Ingresaste como Cliente.");
-      let pinGuardado = parseInt(prompt("Ingrese su nuevo PIN."), 10);
-      let acceso = gestionarAccesoCliente(pinGuardado);
+      const pinGuardado = parseInt(await preguntar("Ingrese su nuevo PIN."), 10);
+      const acceso = await gestionarAccesoCliente(pinGuardado);
 
       if (acceso) {
         let saldo = 5000;
@@ -154,14 +157,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         document.getElementById("consultar").onclick = () => consultarSaldo(saldo, saldoDolares);
-        document.getElementById("retirar").onclick = () => saldo = retirarDinero(saldo, transacciones);
-        document.getElementById("depositar").onclick = () => saldo = depositarDinero(saldo, transacciones);
-        document.getElementById("comprar").onclick = () => [saldo, saldoDolares] = comprarDolares(saldo, saldoDolares, transacciones);
+        document.getElementById("retirar").onclick = async () => saldo = await retirarDinero(saldo, transacciones);
+        document.getElementById("depositar").onclick = async () => saldo = await depositarDinero(saldo, transacciones);
+        document.getElementById("comprar").onclick = async () => [saldo, saldoDolares] = await comprarDolares(saldo, saldoDolares, transacciones);
         document.getElementById("transacciones").onclick = () => mostrarTransacciones(transacciones);
         document.getElementById("salir").onclick = () => {
           mostrarMensaje("Gracias por usar nuestro banco. ¡Hasta luego!");
           operaciones.innerHTML = "";
-          resultado.innerHTML = "";
         };
       }
     }
